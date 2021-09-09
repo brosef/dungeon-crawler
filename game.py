@@ -34,7 +34,7 @@ while not complete:
             break
         if action == ("look" or "inspect"):
             if not has_sword:
-                print("You find a has_sword hidden in some rubbish. You take it.")
+                print("You find a sword hidden in some rubbish. You take it.")
                 has_sword = True
                 continue
             else:
@@ -59,7 +59,7 @@ while not complete:
                 complete = True
                 break
             else:
-                print("You run up to the dragon, ram your has_sword into its neck and neatly slice its jugular. "
+                print("You run up to the dragon, ram your sword into its neck and neatly slice its jugular. "
                       "Blood sprays everywhere in a heavy mist. You smile.")
                 complete = True
                 break
