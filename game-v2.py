@@ -1,74 +1,124 @@
-'''
-    Ask the player for their name.
-    Display a message that greets them and introduces them to the game world.
-    Present them with a choice between two doors.
-    If they choose the left door, they'll see an empty room.
-    If they choose the right door, then they encounter a dragon.
-    In both cases, they have the option to return to the previous room or interact further.
-    When in the seemingly empty room, they can choose to look around. If they do so, they will find a has_sword. They can choose to take it or leave it.
-    When encountering the dragon, they have the choice to fight it.
-    If they have the has_sword from the other room, then they will be able to defeat it and win the game.
-    If they don't have the has_sword, then they will be eaten by the dragon and lose the game.
-'''
-prompt = ">> "
+# TODO: offload room, item, and creature data to json
+# TODO: success = all creatures slayed
+# TODO: implement functions
+# TODO: implement item attributes
+# Save the user input options you allow e.g. in a set that you can check against when your user makes a choice.
+import random
 
-# quest start conditions
-has_sword = False
-is_alive = True
+allowed_verbs = {"look", "open", "pick up", "west", "east", "north", "south", "fight", "run", "inv"}
+
+# Create an inventory for your player, where they can add and remove items.
+
+inv = []
+# Players should be able to collect items they find in rooms and add them to their inventory.
+
+# If they lose a fight against the dragon, then they should lose their inventory items.
+
+#inv.clear()
+#current_room = rooms[0]
+
+# Add more rooms to your game and allow your player to explore.
+
+room0 = {
+    "name": "entry",
+    "description": "You're standing in a room. There is a door to the north",
+    "creatures": {},
+    "items": {},
+    "exits": {
+        "north": 1
+    }
+}
+
+room1 = {
+    "name": "empty",
+    "description": "This is an empty room. There is a door to the west and south.",
+    "creatures": {},
+    "items": [
+        "Dagger",
+        "Health Potion"
+    ],
+    "exits": {
+        "west": 2,
+        "south": 0
+    },
+}
+
+room2 = {
+    "name": "sewer",
+    "description": "This is a room with a foul odor. There is a door to the east.",
+    "creatures": {
+        "fetid monster": {
+            "hp": 1,
+            "description": "big, oozing lump of a creature.",
+        }
+    },
+    "items": [
+        "Fetid Key"
+    ],
+    "exits": {
+        "east": 1
+    }
+}
+
+room3 = {
+    "name": "Room with door",
+    "creatures": {},
+    "items": [],
+    "description": "A locked door is to your North. There is a door to the east.",
+    "exits": {
+        "east": 2
+    }
+}
+
+rooms = [room0, room1, room2, room3]
+# Some rooms can be empty, others can contain items, and yet others can contain an opponent.
+current_room = rooms[0]
 complete = False
-location = ""
-
-name = input(f"Adventurer! Declare yourself! What is thine name? {prompt}")
-print(f"Welcome {name}, to the final leg of your journey.")
 
 while not complete:
-    location = input(f"You face two identical doors to your left and your right. Which do you choose? {prompt}")
-    while location != "left" and location != "right" and location != "outside":
-        location = input(f"Sorry adventurer, {location} makes no sense. Please choose 'left or 'right' {prompt}")
+    # let's spit out current room attributes
+    print(current_room["description"])
+    if current_room["items"]:
+        print("In this room you see: ")
+        for x in current_room["items"]:
+            print(f"a {x}")
+    if current_room["creatures"]:
+        print(f"You see a {current_room['creatures']}")
+
+    # capture player input and test against all items in allowed_verbs
+    player_choice = input('what would you like to do?: ')
+    if player_choice not in allowed_verbs:
+        print("I don't understand that choice. Try again.")
         continue
-    print(f"You open the {location} door and enter.")
-    while location == "left":
-        action = input(f"You see an empty room. What would you like to do? {prompt}")
-        while action != "look" and action != "inspect" and action != "leave":
-            action = input(f"Not sure what you meant there. You can 'look', 'inspect', or 'leave' {prompt}")
-            break
-        if action == ("look" or "inspect"):
-            if not has_sword:
-                print("You find a sword hidden in some rubbish. You take it.")
-                has_sword = True
-                continue
+    if player_choice in current_room["exits"].keys():
+        x = current_room["exits"][player_choice]
+        current_room = rooms[x]
+        continue
+    elif player_choice == "pick up":
+        for f in current_room["items"]:
+            if f in inv:
+                print(f"You already have a(n) {f}")
             else:
-                print("Just some freshly disturbed rubbish here.")
-                continue
-        else:
-            print("You leave the empty room.")
-            location = "outside"
-            break
+                inv.append(f)
+                current_room["items"] = ""
+    elif player_choice == "inv":
+        print("Your inventory contains:")
+        for x in inv:
+            print(f"a {x}")
+    else:
+        print("You can't go there.")
+        continue
 
-    while location == "right":
-        action = input(f"You see a MASSIVE dragon curled up in the middle of the room. "
-                       f"What would you like to do? {prompt}")
-        while action != "fight" and action != "leave":
-            action = input(f"Not sure what you meant there. You can 'fight' or 'leave' {prompt}")
-            break
-        if action == "fight":
-            if not has_sword:
-                print("Since you don't have a weapon, you sneak up to the dragon and punch it on its butt. "
-                      "The dragon awakens and burns you to a crisp.")
-                is_alive = False
-                complete = True
-                break
-            else:
-                print("You run up to the dragon, ram your sword into its neck and neatly slice its jugular. "
-                      "Blood sprays everywhere in a heavy mist. You smile.")
-                complete = True
-                break
-        else:
-            location = "outside"
-            break
 
-if is_alive is False:
-    print(f"{name.upper()}. Punching a dragon on its butt is not a good idea. You should have been wielding some kind "
-          "of weapon.")
-else:
-    print(f"The dragon has been slayed, {name}! You are victorious!")
+# Implement some logic that decides whether or not your player can beat the opponent depending on what items they have
+# in their inventory
+
+
+
+# Use the random module to add a multiplier to your battles, similar to a dice roll in a real game. This pseudo-random
+# element can have an effect on whether your player wins or loses when battling an opponent.
+
+#print(inv)
+
+#if inv["weapons"]["dagger"]["power"] > 1:
+#    print("You win!")
